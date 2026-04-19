@@ -596,6 +596,9 @@ export default function Generex() {
           </div>
         )}
 
+        {/* Sección de donación - Solo cuando no hay QR */}
+        {!qrValue && <DonationSection />}
+
         {/* Footer Info cuando no hay QR */}
         {!qrValue && (
           <div className="mt-12 text-center">
