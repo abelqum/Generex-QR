@@ -9,7 +9,17 @@ import AdBanner from "./AdBanner";
 import DonationSection from "./DonationSection";
 
 export default function Generex() {
+  // Nuevo estado para el tipo de QR
+  const [qrType, setQrType] = useState("url");
+
+  // Estados originales y nuevos para los inputs
   const [inputText, setInputText] = useState("");
+  const [wifiSsid, setWifiSsid] = useState("");
+  const [wifiPassword, setWifiPassword] = useState("");
+  const [wifiEncryption, setWifiEncryption] = useState("WPA");
+  const [waPhone, setWaPhone] = useState("");
+  const [waMessage, setWaMessage] = useState("");
+
   const [qrValue, setQrValue] = useState("");
   const [isDownloading, setIsDownloading] = useState(false);
   const [fileName, setFileName] = useState("mi-qr");
@@ -22,20 +32,35 @@ export default function Generex() {
   const [qrFgColor, setQrFgColor] = useState("#000000");
   const [showStylePanel, setShowStylePanel] = useState(false);
 
+  // Generación adaptada a los múltiples tipos
   const handleGenerate = (e) => {
     e.preventDefault();
-    if (inputText.trim()) {
-      setQrValue(inputText);
-      // Sugerir nombre basado en el contenido
-      const suggestedName = inputText
+    let finalValue = "";
+    let suggestedName = "mi-qr";
+
+    if (qrType === "url") {
+      if (!inputText.trim()) return;
+      finalValue = inputText;
+      suggestedName = inputText
         .replace(/^https?:\/\//, "")
         .replace(/[^a-zA-Z0-9]/g, "-")
         .substring(0, 20)
         .toLowerCase();
-      setFileName(suggestedName || "mi-qr");
+    } else if (qrType === "wifi") {
+      if (!wifiSsid.trim()) return;
+      finalValue = `WIFI:T:${wifiEncryption};S:${wifiSsid};P:${wifiPassword};;`;
+      suggestedName = `wifi-${wifiSsid.replace(/[^a-zA-Z0-9]/g, "-").toLowerCase()}`;
+    } else if (qrType === "whatsapp") {
+      if (!waPhone.trim()) return;
+      finalValue = `https://wa.me/${waPhone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(waMessage)}`;
+      suggestedName = `wa-${waPhone.replace(/[^0-9]/g, "")}`;
     }
+
+    setQrValue(finalValue);
+    setFileName(suggestedName || "mi-qr");
   };
 
+  // Descarga corregida usando qrRef
   const handleDownload = () => {
     const canvas = qrRef.current?.querySelector("canvas");
     if (!canvas) return;
@@ -47,9 +72,14 @@ export default function Generex() {
     link.click();
   };
 
+  // Reset actualizado para limpiar todos los campos
   const handleReset = () => {
     setQrValue("");
     setInputText("");
+    setWifiSsid("");
+    setWifiPassword("");
+    setWaPhone("");
+    setWaMessage("");
     setFileName("mi-qr");
     setQrStyle("classic");
     setQrBgColor("#ffffff");
@@ -105,7 +135,7 @@ export default function Generex() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="max-w-4xl mx-auto px-4 py-12">
-        {/* Header */}
+        {/* Header (Intacto) */}
         <div className="text-center mb-8">
           <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
             ⚡ Generex
@@ -114,7 +144,7 @@ export default function Generex() {
             Genera códigos QR ilimitados, sin caducidad y completamente gratis.
             Todo se procesa en tu navegador, sin servidores externos.
           </p>
-          <div className="inline-flex  mt-5 items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1.5 rounded-full text-sm font-medium mb-4">
+          <div className="inline-flex mt-5 items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1.5 rounded-full text-sm font-medium mb-4">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
@@ -123,8 +153,9 @@ export default function Generex() {
           </div>
         </div>
 
-        {/* Features Grid */}
+        {/* Features Grid (Intacto) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          {/* Card 1 */}
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-gray-100">
             <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center mb-3">
               <svg
@@ -146,7 +177,7 @@ export default function Generex() {
               Sin límites ni pagos ocultos
             </p>
           </div>
-
+          {/* Card 2 */}
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-gray-100">
             <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mb-3">
               <svg
@@ -170,7 +201,7 @@ export default function Generex() {
               Todo se genera en tu navegador
             </p>
           </div>
-
+          {/* Card 3 */}
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-lg border border-gray-100">
             <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center mb-3">
               <svg
@@ -194,36 +225,150 @@ export default function Generex() {
           </div>
         </div>
 
-        {/* Input Form */}
+        {/* Input Form modificado con pestañas */}
         <div className="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-100">
+          {/* Selector de Pestañas */}
+          <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-100 pb-4">
+            <button
+              onClick={() => setQrType("url")}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${qrType === "url" ? "bg-blue-100 text-blue-700" : "bg-gray-50 text-gray-600 hover:bg-gray-100"}`}
+            >
+              🔗 Enlace / Texto
+            </button>
+            <button
+              onClick={() => setQrType("wifi")}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${qrType === "wifi" ? "bg-blue-100 text-blue-700" : "bg-gray-50 text-gray-600 hover:bg-gray-100"}`}
+            >
+              📶 Red WiFi
+            </button>
+            <button
+              onClick={() => setQrType("whatsapp")}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${qrType === "whatsapp" ? "bg-blue-100 text-blue-700" : "bg-gray-50 text-gray-600 hover:bg-gray-100"}`}
+            >
+              💬 WhatsApp
+            </button>
+          </div>
+
           <form onSubmit={handleGenerate}>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              ¿Qué quieres convertir en QR?
-            </label>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="text"
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                placeholder="Ej: https://tusitio.com o +52 123 456 7890"
-                className="flex-1 px-5 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-700 placeholder-gray-400"
-                disabled={isDownloading}
-              />
-              <button
-                type="submit"
-                className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 shadow-lg"
-                disabled={isDownloading}
-              >
-                Generar QR
-              </button>
-            </div>
+            {qrType === "url" && (
+              <>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  ¿Qué quieres convertir en QR?
+                </label>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="text"
+                    maxLength={500}
+                    aria-label="Contenido del código QR"
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    placeholder="Ej: https://tusitio.com o +52 123 456 7890"
+                    className="flex-1 px-5 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-700 placeholder-gray-400"
+                    disabled={isDownloading}
+                  />
+                  <button
+                    type="submit"
+                    aria-label="Generar código QR"
+                    className="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 shadow-lg"
+                    disabled={isDownloading}
+                  >
+                    Generar QR
+                  </button>
+                </div>
+              </>
+            )}
+
+            {qrType === "wifi" && (
+              <>
+                <label className="block text-sm font-medium text-gray-700 mb-4">
+                  Ingresa los datos de tu red WiFi
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <input
+                    type="text"
+                    maxLength={100}
+                    aria-label="Nombre de la red WiFi"
+                    value={wifiSsid}
+                    onChange={(e) => setWifiSsid(e.target.value)}
+                    placeholder="Nombre de la Red (SSID)"
+                    className="px-5 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-700 placeholder-gray-400"
+                    disabled={isDownloading}
+                    required
+                  />
+                  <input
+                    type="password"
+                    maxLength={100}
+                    aria-label="Contraseña de la red WiFi"
+                    value={wifiPassword}
+                    onChange={(e) => setWifiPassword(e.target.value)}
+                    placeholder="Contraseña"
+                    className="px-5 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-700 placeholder-gray-400"
+                    disabled={isDownloading}
+                  />
+                  <select
+                    value={wifiEncryption}
+                    aria-label="Tipo de seguridad WiFi"
+                    onChange={(e) => setWifiEncryption(e.target.value)}
+                    className="md:col-span-2 px-5 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-700 bg-white"
+                  >
+                    <option value="WPA">Seguridad: WPA/WPA2/WPA3</option>
+                    <option value="WEP">Seguridad: WEP</option>
+                    <option value="nopass">Sin contraseña</option>
+                  </select>
+                </div>
+                <button
+                  type="submit"
+                  aria-label="Generar código QR WiFi"
+                  className="w-full px-8 py-3.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg"
+                >
+                  Generar QR
+                </button>
+              </>
+            )}
+
+            {qrType === "whatsapp" && (
+              <>
+                <label className="block text-sm font-medium text-gray-700 mb-4">
+                  Ingresa tu número y un mensaje opcional
+                </label>
+                <div className="grid grid-cols-1 gap-4 mb-4">
+                  <input
+                    type="tel"
+                    maxLength={20}
+                    aria-label="Número de teléfono de WhatsApp"
+                    value={waPhone}
+                    onChange={(e) => setWaPhone(e.target.value)}
+                    placeholder="Número con código de país (Ej: 525512345678)"
+                    className="px-5 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-700 placeholder-gray-400"
+                    disabled={isDownloading}
+                    required
+                  />
+                  <textarea
+                    maxLength={300}
+                    aria-label="Mensaje predeterminado de WhatsApp"
+                    value={waMessage}
+                    onChange={(e) => setWaMessage(e.target.value)}
+                    placeholder="Mensaje predeterminado (Ej: Hola, quiero más información)"
+                    className="px-5 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-700 placeholder-gray-400 resize-none h-24"
+                    disabled={isDownloading}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  aria-label="Generar código QR WhatsApp"
+                  className="w-full px-8 py-3.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg"
+                >
+                  Generar QR
+                </button>
+              </>
+            )}
           </form>
         </div>
 
         {/* Anuncio antes del QR */}
         {!qrValue && <AdBanner />}
 
-        {/* QR Result */}
+        {/* QR Result (Intacto visualmente, modificado el ref) */}
         {qrValue && (
           <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
             <div className="text-center">
@@ -231,6 +376,8 @@ export default function Generex() {
               <div className="mb-6">
                 <button
                   onClick={() => setShowStylePanel(!showStylePanel)}
+                  aria-expanded={showStylePanel}
+                  aria-label="Abrir panel de personalización de colores"
                   className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-gray-700 font-medium mb-4"
                 >
                   <svg
@@ -273,11 +420,7 @@ export default function Generex() {
                         <button
                           key={template.style}
                           onClick={() => applyTemplate(template)}
-                          className={`p-3 rounded-lg border-2 transition-all hover:scale-105 ${
-                            qrStyle === template.style
-                              ? "border-blue-500 bg-blue-50"
-                              : "border-gray-200 bg-white hover:border-gray-300"
-                          }`}
+                          className={`p-3 rounded-lg border-2 transition-all hover:scale-105 ${qrStyle === template.style ? "border-blue-500 bg-blue-50" : "border-gray-200 bg-white hover:border-gray-300"}`}
                         >
                           <div className="text-2xl mb-1">{template.icon}</div>
                           <div className="font-medium text-sm">
@@ -311,12 +454,14 @@ export default function Generex() {
                         <div className="flex gap-2">
                           <input
                             type="color"
+                            aria-label="Seleccionar color de fondo"
                             value={qrBgColor}
                             onChange={(e) => setQrBgColor(e.target.value)}
                             className="w-12 h-10 rounded border border-gray-300 cursor-pointer"
                           />
                           <input
                             type="text"
+                            aria-label="Código hexadecimal de color de fondo"
                             value={qrBgColor}
                             onChange={(e) => setQrBgColor(e.target.value)}
                             className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
@@ -331,12 +476,14 @@ export default function Generex() {
                         <div className="flex gap-2">
                           <input
                             type="color"
+                            aria-label="Seleccionar color del QR"
                             value={qrFgColor}
                             onChange={(e) => setQrFgColor(e.target.value)}
                             className="w-12 h-10 rounded border border-gray-300 cursor-pointer"
                           />
                           <input
                             type="text"
+                            aria-label="Código hexadecimal de color del QR"
                             value={qrFgColor}
                             onChange={(e) => setQrFgColor(e.target.value)}
                             className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
@@ -359,6 +506,7 @@ export default function Generex() {
                   </label>
                   <select
                     value={qrSize}
+                    aria-label="Seleccionar tamaño del QR"
                     onChange={(e) => setQrSize(Number(e.target.value))}
                     className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-700 bg-white"
                   >
@@ -383,7 +531,6 @@ export default function Generex() {
                   />
                 </div>
 
-                {/* Nombre del archivo */}
                 <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Nombre del archivo:
@@ -391,6 +538,7 @@ export default function Generex() {
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
+                      aria-label="Nombre de archivo para descargar"
                       value={fileName}
                       onChange={(e) => setFileName(e.target.value)}
                       placeholder="nombre-del-archivo"
@@ -412,6 +560,7 @@ export default function Generex() {
               <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
                 <button
                   onClick={handleDownload}
+                  aria-label="Descargar imagen del código QR"
                   className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-3"
                 >
                   <svg
@@ -432,6 +581,7 @@ export default function Generex() {
 
                 <button
                   onClick={handleReset}
+                  aria-label="Crear un nuevo código QR"
                   className="px-8 py-4 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all transform hover:scale-105 border-2 border-gray-200"
                 >
                   Crear Nuevo QR
