@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 export default function FooterA19() {
   return (
     <footer className="mt-16 text-center border-t border-gray-200 pt-8">
@@ -17,6 +17,28 @@ export default function FooterA19() {
         © {new Date().getFullYear()} Generex - Herramienta gratuita de
         generación QR
       </p>
+      <div className="mt-6 flex gap-4 justify-center text-xs text-gray-500">
+        <Link
+          href="/privacidad"
+          className="hover:text-gray-700 transition-colors"
+        >
+          Privacidad
+        </Link>
+        <span>•</span>
+        <Link
+          href="/terminos"
+          className="hover:text-gray-700 transition-colors"
+        >
+          Términos
+        </Link>
+        <span>•</span>
+        <Link
+          href="/contacto"
+          className="hover:text-gray-700 transition-colors"
+        >
+          Contacto
+        </Link>
+      </div>
     </footer>
   );
 }
