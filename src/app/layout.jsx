@@ -40,6 +40,10 @@ export default function RootLayout({ children }) {
     >
       <head>
         <AdSenseScript />
+        <meta
+          name="google-site-verification"
+          content="am_8WKb5kJt9jhiPnEBtBy2QFDM1BSDUxyNF33kx4A8"
+        />
       </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
