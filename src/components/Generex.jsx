@@ -37,7 +37,7 @@ export default function Generex() {
   };
 
   const handleDownload = () => {
-    const canvas = document.querySelector("canvas");
+    const canvas = qrRef.current?.querySelector("canvas");
     if (!canvas) return;
 
     const link = document.createElement("a");
@@ -107,14 +107,6 @@ export default function Generex() {
       <div className="max-w-4xl mx-auto px-4 py-12">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1.5 rounded-full text-sm font-medium mb-4">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-            </span>
-            100% Gratis • Sin registro • QR permanentes
-          </div>
-
           <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
             ⚡ Generex
           </h1>
@@ -122,6 +114,13 @@ export default function Generex() {
             Genera códigos QR ilimitados, sin caducidad y completamente gratis.
             Todo se procesa en tu navegador, sin servidores externos.
           </p>
+          <div className="inline-flex  mt-5 items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1.5 rounded-full text-sm font-medium mb-4">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            100% Gratis • Sin registro • QR permanentes
+          </div>
         </div>
 
         {/* Features Grid */}
